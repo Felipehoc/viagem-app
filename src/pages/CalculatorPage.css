@@ -1,0 +1,6 @@
+.calculator-container {
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace; /* mesma do recibo */
+  margin-top: 20px;
+  padding: 20px;
+}
