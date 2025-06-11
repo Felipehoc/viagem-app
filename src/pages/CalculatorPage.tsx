@@ -10,7 +10,7 @@ interface CalculatorPageProps {
 export default function CalculatorPage({ onSave, editingEntry }: CalculatorPageProps) {
   return (
     <div className="calculator-container">
-      <h2>Calculadora de Viagem</h2>
+      <h1>Calculadora de Viagem</h1>
       <TravelCostForm onSave={onSave} editingEntry={editingEntry} />
     </div>
   );

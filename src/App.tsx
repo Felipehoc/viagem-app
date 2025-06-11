@@ -1,80 +1,81 @@
 import { useState, useEffect } from "react";
 import CalculatorPage from "./pages/CalculatorPage";
-import HistoryPage from "./pages/HistoryPage";
+import HistoryPage   from "./pages/HistoryPage";
+import ReceiptPage   from "./pages/ReceiptPage";
 import "./App.css";
 
-function App() {
-  const [history, setHistory] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState<"calculator" | "history">("calculator");
-  const [editingEntry, setEditingEntry] = useState<any | null>(null);
+type Page = "calculator" | "history"; // (o recibo é controlado por `selectedReceipt`)
 
-  // Carregar do localStorage ao iniciar
+export default function App() {
+  const [history, setHistory]             = useState<any[]>([]);
+  const [currentPage, setCurrentPage]     = useState<Page>("calculator");
+  const [editingEntry, setEditingEntry]   = useState<any | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
+
+  /* ▸ Carrega histórico salvo */
   useEffect(() => {
-    const savedHistory = localStorage.getItem("travelHistory");
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory));
-    }
+    const saved = localStorage.getItem("travelHistory");
+    if (saved) setHistory(JSON.parse(saved));
   }, []);
 
-  // Salvar no localStorage sempre que mudar o history
+  /* ▸ Salva sempre que o histórico muda */
   useEffect(() => {
     localStorage.setItem("travelHistory", JSON.stringify(history));
   }, [history]);
 
-const handleSave = (entry: any) => {
-  if (editingEntry) {
-    // Se estiver editando, atualiza a entrada correspondente
-    setHistory((prevHistory) =>
-      prevHistory.map((item) =>
-        item.data === editingEntry.data ? { ...entry, data: editingEntry.data } : item
-      )
-    );
-    setEditingEntry(null);
-  } else {
-    // Nova entrada com data gerada
-    const newEntry = {
-      ...entry,
-      data: new Date().toISOString(), // Adiciona um campo "data" único
-    };
-    setHistory((prevHistory) => [...prevHistory, newEntry]);
-  }
-  setCurrentPage("history"); // vai para histórico ao salvar
-};
-
-  const handleDelete = (index: number) => {
-    setHistory((prevHistory) => prevHistory.filter((_, i) => i !== index));
-  };
-
-  const handleClear = () => {
-    if (confirm("Tem certeza que deseja limpar todo o histórico?")) {
-      setHistory([]);
+  /* ▸ Salvar (novo ou edição) */
+  const handleSave = (entry: any) => {
+    if (editingEntry) {
+      setHistory(prev =>
+        prev.map(item =>
+          item.data === editingEntry.data ? { ...entry, data: editingEntry.data } : item
+        )
+      );
+      setEditingEntry(null);
+    } else {
+      const newEntry = { ...entry, data: new Date().toISOString() };
+      setHistory(prev => [...prev, newEntry]);
     }
+    setCurrentPage("history");
   };
 
-  const handleEdit = (entry: any) => {
+  /* ▸ Funções auxiliares */
+  const handleDelete = (idx: number) =>
+    setHistory(prev => prev.filter((_, i) => i !== idx));
+
+
+  const handleEdit   = (entry: any) => {
     setEditingEntry(entry);
     setCurrentPage("calculator");
   };
 
+  /* ▸ Renderização */
   return (
     <div>
-      <nav style={{ textAlign: "center", marginBottom: "20px" }}>
-        <button onClick={() => setCurrentPage("calculator")}>Calculadora</button>
-        <button onClick={() => setCurrentPage("history")}>Histórico</button>
-      </nav>
+      {/* Barra de navegação só aparece quando NÃO estamos na tela de recibo */}
+      {!selectedReceipt && (
+        <nav style={{ textAlign: "center", marginBottom: 20 }}>
+          <button onClick={() => setCurrentPage("calculator")}>Calculadora</button>
+          <button onClick={() => setCurrentPage("history")}>Histórico</button>
+        </nav>
+      )}
 
-      {currentPage === "calculator" ? (
+      {/* Tela de recibo (tem prioridade) */}
+      {selectedReceipt ? (
+        <ReceiptPage
+          receiptData={selectedReceipt}
+          onBack={() => setSelectedReceipt(null)}
+        />
+      ) : currentPage === "calculator" ? (
         <CalculatorPage onSave={handleSave} editingEntry={editingEntry} />
       ) : (
         <HistoryPage
           history={history}
           onDelete={handleDelete}
-          onClear={handleClear}
           onEdit={handleEdit}
+          onView={setSelectedReceipt}       
         />
       )}
     </div>
   );
 }
-
-export default App;
