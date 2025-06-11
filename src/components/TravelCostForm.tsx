@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { calcularCustoViagem, calcular } from "../utils/travelCostCalculator";
 import "./TravelCostForm.css";
+import * as htmlToImage from 'html-to-image';
+import html2canvas from "html2canvas";
+
 
 interface TravelCostFormProps {
   onSave: (entry: any) => void;
@@ -16,7 +19,9 @@ function TravelCostForm({ onSave, editingEntry }: TravelCostFormProps) {
   const [custoDezMilKm, setCustoDezMilKm] = useState<string>('');
   const [nomeViagem, setNomeViagem] = useState<string>('');
   const [result, setResult] = useState<any | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
+ 
   useEffect(() => {
     if (editingEntry) {
       setCustoCombustivel(String(editingEntry.custoCombustivel || ''));
@@ -102,6 +107,39 @@ function TravelCostForm({ onSave, editingEntry }: TravelCostFormProps) {
     }
   };
 
+const handleShare = async () => {
+  if (!resultRef.current) return;
+
+  try {
+    const canvas = await html2canvas(resultRef.current);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve)
+    );
+
+    if (!blob) return;
+
+    const filesArray = [
+      new File([blob], 'resultado-viagem.png', {
+        type: 'image/png',
+      }),
+    ];
+
+    if (navigator.canShare && navigator.canShare({ files: filesArray })) {
+      await navigator.share({
+        files: filesArray,
+        title: 'Resultado da viagem',
+        text: 'Confira o custo da minha viagem!',
+      });
+    } else {
+      alert('Compartilhamento não suportado neste navegador.');
+    }
+  } catch (error) {
+    console.error('Erro ao compartilhar:', error);
+  }
+};
+
+
+
   return (
     <form className="travel-form" onSubmit={handleSubmit}>
       <label>Nome da viagem:</label>
@@ -156,18 +194,24 @@ function TravelCostForm({ onSave, editingEntry }: TravelCostFormProps) {
       <button type="submit">Calcular</button>
 
       {result && (
-        <div className="result-box">
-          <h3>Resultado:</h3>
-          <p>Custo total da viagem: R$ {result.custoTotal.toFixed(2)}</p>
-          <p>Custo por pessoa: R$ {result.custoTotalPorPessoa.toFixed(2)}</p>
-          <p>Custo de combustível: R$ {result.custoTotalCombustivel.toFixed(2)}</p>
-          <p>Quantidade de litros usados: {result.quantidadeDeLitrosUsado.toFixed(2)} L</p>
-          <p>Custo de manutenção: R$ {result.custoManutencao.toFixed(2)}</p>
-          <button type="button" onClick={handleSave}>
-            Salvar no histórico
-          </button>
-        </div>
-      )}
+        <div className="result-box" ref={resultRef}>
+        <h3>Resultado:</h3>
+        <p><strong>Viagem:</strong> {result.nomeViagem}</p>
+        <p>Custo total da viagem: R$ {result.custoTotal.toFixed(2)}</p>
+        <p>Custo por pessoa: R$ {result.custoTotalPorPessoa.toFixed(2)}</p>
+        <p>Custo de combustível: R$ {result.custoTotalCombustivel.toFixed(2)}</p>
+        <p>Quantidade de litros usados: {result.quantidadeDeLitrosUsado.toFixed(2)} L</p>
+        <p>Custo de manutenção: R$ {result.custoManutencao.toFixed(2)}</p>
+
+        <button type="button" onClick={handleSave}>
+          Salvar no histórico
+        </button>
+
+        <button type="button" onClick={handleShare}>
+          Compartilhar resultado
+        </button>
+      </div>
+    )}
     </form>
   );
 }
