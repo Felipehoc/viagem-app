@@ -195,7 +195,7 @@ const handleShare = async () => {
       {result && (
         <div className="result-box" ref={resultRef}>
         <h3>Resultado:</h3>
-        <p><strong>Viagem:</strong> {result.nomeViagem}</p>
+        <p><strong>Viagem: {result.nomeViagem}</strong></p>
         <p>Custo total da viagem: R$ {result.custoTotal.toFixed(2)}</p>
         <p>Custo por pessoa: R$ {result.custoTotalPorPessoa.toFixed(2)}</p>
         <p>Custo de combustível: R$ {result.custoTotalCombustivel.toFixed(2)}</p>
