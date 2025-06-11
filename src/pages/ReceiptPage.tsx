@@ -1,5 +1,5 @@
 import "./ReceiptPage.css"; // (opcional) crie esse CSS para customizar melhor
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { toPng } from "html-to-image";
 
 interface ReceiptPageProps {
