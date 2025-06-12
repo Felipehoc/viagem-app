@@ -82,6 +82,7 @@ export default function ReceiptPage({ receiptData, onBack }: ReceiptPageProps) {
           <p><strong>Pessoas:</strong> {receiptData.numPessoas}</p>
           <hr />
           <p><strong>Litros Usados:</strong> {receiptData.quantidadeDeLitrosUsado.toFixed(2)} L</p>
+          <p><strong>Custo de combustível:</strong> R$ {receiptData.custoTotalCombustivel.toFixed(2)}</p>
           <p><strong>Manutenção proporcional:</strong> R$ {receiptData.custoManutencao.toFixed(2)}</p>
           <hr />
           <p><strong>Total:</strong> <b>R$ {receiptData.custoTotal.toFixed(2)}</b></p>

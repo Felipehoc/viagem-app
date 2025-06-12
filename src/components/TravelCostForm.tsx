@@ -209,7 +209,10 @@ const handleShare = async () => {
         <button type="button" onClick={handleShare}>
           Compartilhar resultado
         </button>
+        
+        
       </div>
+      
     )}
     </form>
   );
